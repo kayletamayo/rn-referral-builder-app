@@ -2,8 +2,7 @@ import * as React from "react";
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from "react-native-vector-icons/Ionicons";
-
-import { colors } from "@utils/theme";
+import { useTheme } from 'react-native-paper';
 
 import { APP_ROUTES } from './routes';
 
@@ -16,16 +15,18 @@ const RouteIcons = {
 };
 
 const AppRoutes = () => {
+  const theme = useTheme();
   return (
     <NavigationContainer>
       <Tab.Navigator screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
           return <Icon name={RouteIcons[route.name]} size={size} color={color} />;
         },
-        tabBarActiveTintColor: colors.primary500,
-        tabBarInactiveTintColor: colors.neutral500,
+        tabBarActiveTintColor: theme.colors.primary,
         headerTitle: "",
-      })}>
+        tabBarHideOnKeyboard: true,
+      })}
+      >
         {/* if list has details page, we can create a separate stack for this. */}
         <Tab.Screen
           name={APP_ROUTES.REFERRAL_BUILDER}
