@@ -26,11 +26,6 @@ export const makeStyles = (theme: ThemeProp) =>
       borderRadius: 10,
       paddingVertical: 5,
     },
-    searchInput: {
-      flex: 1,
-      marginLeft: 15,
-      borderBottomWidth: 0,
-    },
     searchContentStyle: {
       backgroundColor: theme.colors.surface,
     },

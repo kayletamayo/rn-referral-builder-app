@@ -19,6 +19,9 @@ module.exports = {
           '@utils': './src/utils',
           '@defaults': './src/defaults',
           'types': './src/types',
+          '@constants': './src/constants',
+          '@hooks': './src/hooks',
+          '@context': './src/context',
         }
       }
     ]

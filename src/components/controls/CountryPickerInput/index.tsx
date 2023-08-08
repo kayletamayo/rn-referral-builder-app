@@ -29,6 +29,7 @@ const CountryPickerInput: React.FC<CountryPickerInputProps> = ({ value = "", onC
           onSelect={(country) => onCountrySelect(country.cca2)}
           withFilter={allowSearch}
           withCountryNameButton
+          //@ts-ignore
           placeholder="Select..."
           containerButtonStyle={styles.inputStyle}
         />

@@ -1,32 +1,52 @@
-import React, { useState, useMemo } from "react";
-import { DataTable, useTheme, Text } from 'react-native-paper';
+import React, { useState, useMemo, useEffect } from "react";
+import { DataTable, useTheme, Text, ActivityIndicator } from 'react-native-paper';
 
 import { makeStyles } from './styles';
 import { View } from 'react-native';
 
 interface TableProps<T> {
-  data: T[];
+  data: {
+    pageNumber: number;
+    pageSize: number;
+    paginatedData: T[];
+    totalCount: number;
+    totalPages: number;
+  };
   withActions?: boolean;
   renderColumns: (item: T) => void;
   renderActions?: (item: T) => void;
   renderTitle: () => void;
+  onPageChange: (page: number, pageSize: number) => void;
+  loading?: boolean;
 };
 
-const Table: React.FC<TableProps<any>> = ({ data, withActions = false, renderColumns, renderActions, renderTitle }) => {
+const Table: React.FC<TableProps<any>> = ({ data, withActions = false, renderColumns, renderActions, renderTitle, onPageChange, loading }) => {
   const [page, setPage] = useState(1);
-  const [numberOfItemsPerPageList] = useState([5, 10, 15, 20]);
+  const [numberOfItemsPerPageList] = useState([10, 15, 20]);
   const [itemsPerPage, onItemsPerPageChange] = useState(numberOfItemsPerPageList[0]);
 
   const theme = useTheme();
   const styles = makeStyles(theme);
 
-  const from = page * itemsPerPage;
-  const to = Math.min((page + 1) * itemsPerPage, data.length);
+  const { paginatedData, pageNumber, pageSize, totalCount, totalPages } = data;
 
-  // usememo
+  useEffect(() => {
+    onPageChange(page, itemsPerPage)
+  }, [itemsPerPage, page]);
 
   const TableColumns = useMemo(() => {
-    if (data.length <= 0) {
+
+    if (loading && paginatedData.length <= 0) {
+      return (
+        <DataTable.Row>
+          <View style={styles.emptyList}>
+            <ActivityIndicator animating={loading} size={30} />
+          </View>
+        </DataTable.Row>
+      );
+    }
+
+    if (paginatedData && paginatedData.length <= 0) {
       return (
         <DataTable.Row>
           <View style={styles.emptyList}>
@@ -35,9 +55,8 @@ const Table: React.FC<TableProps<any>> = ({ data, withActions = false, renderCol
         </DataTable.Row>
       );
     }
-
-    return data.map((item) => (
-      <DataTable.Row key={item.id}>
+    return paginatedData.map((item) => (
+      <DataTable.Row key={item["_id"]}>
         <>{renderColumns(item)}</>
         {withActions && renderActions && (
           <DataTable.Cell style={styles.actions}>
@@ -46,28 +65,30 @@ const Table: React.FC<TableProps<any>> = ({ data, withActions = false, renderCol
         )}
       </DataTable.Row>
     ));
-  }, [data]);
+  }, [paginatedData]);
 
   return (
     <DataTable>
       <DataTable.Header style={styles.dataHeader}>
         <>{renderTitle()}</>
-        {withActions && <DataTable.Title style={styles.actionTitle}>ACTIONS</DataTable.Title>}
+        {withActions && (
+          <DataTable.Title style={styles.actionTitle}>ACTIONS</DataTable.Title>
+        )}
       </DataTable.Header>
 
       {TableColumns}
 
       <DataTable.Pagination
         page={page}
-        numberOfPages={Math.ceil(data.length / itemsPerPage)}
+        numberOfPages={totalPages}
         onPageChange={(page) => setPage(page)}
-        label={`${from + 1}-${to} of ${data.length}`}
         numberOfItemsPerPageList={numberOfItemsPerPageList}
-        numberOfItemsPerPage={itemsPerPage}
+        numberOfItemsPerPage={pageSize}
         onItemsPerPageChange={onItemsPerPageChange}
         showFastPaginationControls={false}
         selectPageDropdownLabel="Rows per page"
         style={styles.dataTable}
+        label={`${pageNumber}-${pageSize} of ${totalCount}`}
       />
     </DataTable>
   );

@@ -1,130 +1,30 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, ScrollView } from "react-native";
-import { useTheme, Text, Searchbar, DataTable } from "react-native-paper";
+import { useTheme, Text, DataTable } from "react-native-paper";
 import Table from "@components/Table";
 import { Button } from "@components/controls";
 import { makeStyles } from "./styles";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { SearchInput } from "@components/controls";
+
+import { useReferral } from '@hooks/useReferral';
+import { useReferralState } from '@context/referralContext';
 
 interface Props {}
 
 const ReferralList: React.FC<Props> = () => {
   const theme = useTheme();
   const styles = makeStyles(theme);
+  const { getReferrals, loading } = useReferral();
+  const { referrals } = useReferralState();
 
-  const mockData = {
-    pageNumber: 1,
-    pageSize: 10,
-    paginatedData: [
-      {
-        firstName: "Justin",
-        lastName: "Septimus",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "1",
-      },
-      {
-        firstName: "Anika Rhiel",
-        lastName: "Madsen",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "2",
-      },
-      {
-        firstName: "Miracle",
-        lastName: "Vaccaro",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "3",
-      },
-      {
-        firstName: "Erin",
-        lastName: "Levin",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "4",
-      },
-      {
-        firstName: "Mira",
-        lastName: "Herwitz",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "5",
-      },
-      {
-        firstName: "Justin",
-        lastName: "Septimus",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "6",
-      },
-      {
-        firstName: "Anika Rhiel",
-        lastName: "Madsen",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "7",
-      },
-      {
-        firstName: "Miracle",
-        lastName: "Vaccaro",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "8",
-      },
-      {
-        firstName: "Erin",
-        lastName: "Levin",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "9",
-      },
-      {
-        firstName: "Mira",
-        lastName: "Herwitz",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "10",
-      },
-      {
-        firstName: "Justin",
-        lastName: "Septimus",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "11",
-      },
-      {
-        firstName: "Anika Rhiel",
-        lastName: "Madsen",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "12",
-      },
-      {
-        firstName: "Miracle",
-        lastName: "Vaccaro",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "13",
-      },
-      {
-        firstName: "Erin",
-        lastName: "Levin",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "14",
-      },
-      {
-        firstName: "Mira",
-        lastName: "Herwitz",
-        phone: "0436-283-2938",
-        email: "example@email.com",
-        id: "15",
-      },
-    ],
-    totalPages: 2,
-    totalCount: 4,
-  };
+  const getListData = (page: number, pageSize: number, search?: string) => {
+    getReferrals(page, pageSize, search);
+  }
+
+  useEffect(() => {
+    getListData(1, 10);
+  }, []);
 
   const renderColumns = (item: any) => {
     return (
@@ -137,7 +37,7 @@ const ReferralList: React.FC<Props> = () => {
         </DataTable.Cell>
         <DataTable.Cell style={styles.phoneCell}>
           <>
-            <Text variant="labelLarge">{item.phone}</Text>
+            <Text variant="labelLarge">{item.mobileNumber}</Text>
           </>
         </DataTable.Cell>
       </>
@@ -171,29 +71,18 @@ const ReferralList: React.FC<Props> = () => {
             labelStyle={styles.filterBtnLabel}
             style={styles.filterBtn}
           />
-          <Searchbar
-            placeholder="Search"
-            onChangeText={() => {}}
-            value=""
-            mode="bar"
-            style={styles.searchInput}
-            showDivider={false}
-            theme={{
-              colors: {
-                elevation: {
-                  level3: theme.colors.surface,
-                },
-              },
-              roundness: 1,
-            }}
+          <SearchInput
+            onSearch={(search) => getListData(1, 10, search)}
           />
         </View>
       </View>
       <Table
-        data={mockData.paginatedData}
+        data={referrals}
         renderTitle={renderTitle}
         renderColumns={renderColumns}
         renderActions={renderActions}
+        onPageChange={(page, pageSize) => {getListData(page, pageSize)}}
+        loading={loading}
         withActions
       />
     </ScrollView>

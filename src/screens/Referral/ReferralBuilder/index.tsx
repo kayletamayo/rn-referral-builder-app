@@ -9,6 +9,8 @@ import { useForm, Controller } from 'react-hook-form';
 
 import { ReferralCreateDefault } from '@defaults/referral';
 import { ReferralCreate } from 'types/referral';
+import { useReferral } from '@hooks/useReferral';
+import Toast from 'react-native-toast-message';
 
 interface Props {}
 
@@ -20,6 +22,7 @@ const FormInputs = [
         label: "First Name",
         name: "firstName",
         inputType: "input",
+        mode: "text",
         validation: {
           required: "First name field is required",
         },
@@ -28,6 +31,7 @@ const FormInputs = [
         label: "Last Name",
         inputType: "input",
         name: "lastName",
+        mode: "text",
         validation: {
           required: "Last name field is required",
         },
@@ -36,14 +40,20 @@ const FormInputs = [
         label: "Email",
         inputType: "input",
         name: "email",
+        mode: "email",
         validation: {
           required: "Email field is required",
+          pattern: {
+            value: /\S+@\S+\.\S+/,
+            message: "Email format is invalid",
+          },
         },
       },
       {
         label: "Mobile",
         inputType: "input",
-        name: "mobile",
+        name: "mobileNumber",
+        mode: "numeric",
         validation: {
           required: "Mobile number field is required",
         },
@@ -56,37 +66,45 @@ const FormInputs = [
       {
         label: "Address line 1",
         inputType: "input",
-        name: "address1",
-        validation: {},
+        name: "addressLine1",
+        mode: "text",
+        validation: {
+          required: "Address line 1 field is required",
+        },
       },
       {
         label: "Address line 2",
         inputType: "input",
-        name: "address2",
+        name: "addressLine2",
+        mode: "text",
         validation: {},
       },
       {
         label: "Suburb",
         inputType: "input",
         name: "suburb",
+        mode: "text",
         validation: {},
       },
       {
         label: "State",
         inputType: "input",
         name: "state",
+        mode: "text",
         validation: {},
       },
       {
         label: "Postcode",
         inputType: "input",
-        name: "postcode",
+        name: "postCode",
+        mode: "text",
         validation: {},
       },
       {
         label: "Country",
         inputType: "countryPicker",
         name: "country",
+        mode: "text",
         validation: {
           required: "Country field is required",
         },
@@ -98,12 +116,13 @@ const FormInputs = [
 const ReferralBuilder: React.FC<Props> = (props) => {
   const theme = useTheme();
   const styles = makeStyles(theme);
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, reset } = useForm({
     defaultValues: ReferralCreateDefault
   });
+  const { createReferral, loading } = useReferral();
 
   const renderFormFields = ({ item }: any) => {
-    const { inputType, validation, name, label } = item;
+    const { inputType, validation, name, label, mode } = item;
     switch (inputType) {
       case "countryPicker":
         return (
@@ -139,6 +158,7 @@ const ReferralBuilder: React.FC<Props> = (props) => {
                   onBlur={onBlur}
                   value={value}
                   errorMessage={error?.message}
+                  inputMode={mode}
                 />
               );
             }}
@@ -155,7 +175,16 @@ const ReferralBuilder: React.FC<Props> = (props) => {
     )
   }
 
-  const onSubmit = (data: ReferralCreate) => console.log(data);
+  const onSubmit = async(data: ReferralCreate) => {
+    await createReferral(data);
+    Toast.show({
+       type: "success",
+       text1: "Success",
+       text2: "Referral record saved successfully!",
+       position: 'bottom',
+     });
+    reset();
+  };
 
   return (
     <KeyboardAvoidingView
@@ -182,6 +211,7 @@ const ReferralBuilder: React.FC<Props> = (props) => {
             mode="contained"
             onPress={handleSubmit(onSubmit)}
             style={styles.submitBtn}
+            loading={loading}
           />
         }
       />
