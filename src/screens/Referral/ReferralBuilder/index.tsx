@@ -4,7 +4,7 @@ import { View, Platform, KeyboardAvoidingView, SectionList } from "react-native"
 import { useTheme, Text } from 'react-native-paper';
 import { makeStyles } from './styles';
 
-import { Input, Button } from '@components/controls';
+import { Input, Button, CountryPickerInput } from '@components/controls';
 import { useForm, Controller } from 'react-hook-form';
 
 import { ReferralCreateDefault } from '@defaults/referral';
@@ -20,25 +20,33 @@ const FormInputs = [
         label: "First Name",
         name: "firstName",
         inputType: "input",
-        validation: {},
+        validation: {
+          required: "First name field is required",
+        },
       },
       {
         label: "Last Name",
         inputType: "input",
         name: "lastName",
-        validation: {},
+        validation: {
+          required: "Last name field is required",
+        },
       },
       {
         label: "Email",
         inputType: "input",
         name: "email",
-        validation: {},
+        validation: {
+          required: "Email field is required",
+        },
       },
       {
         label: "Mobile",
         inputType: "input",
         name: "mobile",
-        validation: {},
+        validation: {
+          required: "Mobile number field is required",
+        },
       },
     ],
   },
@@ -79,7 +87,9 @@ const FormInputs = [
         label: "Country",
         inputType: "countryPicker",
         name: "country",
-        validation: {},
+        validation: {
+          required: "Country field is required",
+        },
       },
     ],
   },
@@ -96,7 +106,23 @@ const ReferralBuilder: React.FC<Props> = (props) => {
     const { inputType, validation, name, label } = item;
     switch (inputType) {
       case "countryPicker":
-        return null;
+        return (
+          <Controller
+            control={control}
+            rules={validation}
+            name={name}
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => {
+              return (
+                <CountryPickerInput
+                  value={value}
+                  onCountrySelect={onChange}
+                  title={label}
+                  errorMessage={error?.message}
+                />
+              );
+            }}
+          />
+        );
       case "input":
       default:
         return (
@@ -104,8 +130,17 @@ const ReferralBuilder: React.FC<Props> = (props) => {
             control={control}
             rules={validation}
             name={name}
-            render={({ field: { onChange, onBlur, value } }) => {
-              return <Input mode="outlined" title={label} onChangeText={(value) => onChange(value)} onBlur={onBlur} value={value} />;
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => {
+              return (
+                <Input
+                  mode="outlined"
+                  title={label}
+                  onChangeText={(value) => onChange(value)}
+                  onBlur={onBlur}
+                  value={value}
+                  errorMessage={error?.message}
+                />
+              );
             }}
           />
         );
